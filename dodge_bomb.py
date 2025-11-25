@@ -1,3 +1,4 @@
+import math
 import os
 import random
 import sys
@@ -45,41 +46,50 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     return imgs, bb_accs
 
 
+def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    orgからdstへの方向ベクトルを計算し、方向を返す
+    """
+    diff_x = dst.centerx - org.centerx
+    diff_y = dst.centery - org.centery
+    norm = math.sqrt(diff_x**2 + diff_y**2)
+    
+    if norm < 300: # 距離が300未満なら慣性移動
+        return current_xy
+
+    const = math.sqrt(50) / norm # 正規化とスケーリング
+    
+    return diff_x * const, diff_y * const
+
+
 def gameover(screen: pg.Surface) -> None:
     """
     ゲームオーバー時に、半透明の黒い画面上に
     「Game Over」の文字と、泣いているこうかとん画像を表示する
     引数 screen：画面Surface
     """
-    # 黒い矩形を描画するための空のSurfaceを作る
-    kuro_img = pg.Surface((WIDTH, HEIGHT))
+
+    kuro_img = pg.Surface((WIDTH, HEIGHT)) # 空のSurfaceを作る
     pg.draw.rect(kuro_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
     
-    # 透明度を設定して、先に黒い幕だけscreenに貼り付ける
-    kuro_img.set_alpha(127)
+    kuro_img.set_alpha(127) # 透明度を設定し,黒い幕
     screen.blit(kuro_img, (0, 0))
     
-    # 白文字のSurfaceを作り、【screenに】貼り付ける
-    fonto = pg.font.Font(None, 80)
+    fonto = pg.font.Font(None, 80) # 白文字のSurfaceを作り、貼り付け
     txt_img = fonto.render("Game Over", True, (255, 255, 255))
     txt_rct = txt_img.get_rect()
     txt_rct.center = WIDTH // 2, HEIGHT // 2
     screen.blit(txt_img, txt_rct)
     
-    # こうかとん画像をロードし、【screenに】貼り付ける
-    kk_img = pg.image.load("fig/8.png") 
+    kk_img = pg.image.load("fig/8.png") # こうかとん画像
     kk_rct = kk_img.get_rect()
     
-    # 文字の左側に配置
-    kk_rct.center = WIDTH // 2 - 200, HEIGHT // 2
+    kk_rct.center = WIDTH // 2 - 200, HEIGHT // 2 # 文字の配置
     screen.blit(kk_img, kk_rct)
-    
-    # 文字の右側に配置
     kk_rct.center = WIDTH // 2 + 200, HEIGHT // 2
     screen.blit(kk_img, kk_rct)
     
-    # 5. 画面を更新して5秒待つ
-    pg.display.update()
+    pg.display.update() # ゲームオーバー5秒
     time.sleep(5)
 
 
@@ -90,8 +100,6 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
-
-    # 爆弾の準備
     bb_imgs, bb_accs = init_bb_imgs()
     bb_img = bb_imgs[0]
     bb_rct = bb_img.get_rect()
@@ -107,15 +115,13 @@ def main():
             if event.type == pg.QUIT:
                 return
 
-        # 衝突判定
-        if kk_rct.colliderect(bb_rct):
+        if kk_rct.colliderect(bb_rct): # 衝突判定
             gameover(screen)
             return
 
         screen.blit(bg_img, [0, 0])
 
-        # こうかとん移動処理
-        key_lst = pg.key.get_pressed()
+        key_lst = pg.key.get_pressed() # こうかとん移動
         sum_mv = [0, 0]
         for key, mv in DELTA.items():
             if key_lst[key]:
@@ -127,9 +133,11 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
 
-        # 爆弾の拡大・加速処理
-        idx = min(tmr // 500, 9)
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy)) # 爆弾からこうかとんへのベクトルを計算
+
+        idx = min(tmr // 500, 9) # 爆弾の拡大・加速
         bb_img = bb_imgs[idx]
+        
         avx = vx * bb_accs[idx]
         avy = vy * bb_accs[idx]
 
