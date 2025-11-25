@@ -58,7 +58,6 @@ def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]
         return current_xy
 
     const = math.sqrt(50) / norm # 正規化とスケーリング
-    
     return diff_x * const, diff_y * const
 
 
@@ -71,10 +70,8 @@ def gameover(screen: pg.Surface) -> None:
 
     kuro_img = pg.Surface((WIDTH, HEIGHT)) # 空のSurfaceを作る
     pg.draw.rect(kuro_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
-    
     kuro_img.set_alpha(127) # 透明度を設定し,黒い幕
     screen.blit(kuro_img, (0, 0))
-    
     fonto = pg.font.Font(None, 80) # 白文字のSurfaceを作り、貼り付け
     txt_img = fonto.render("Game Over", True, (255, 255, 255))
     txt_rct = txt_img.get_rect()
@@ -83,7 +80,6 @@ def gameover(screen: pg.Surface) -> None:
     
     kk_img = pg.image.load("fig/8.png") # こうかとん画像
     kk_rct = kk_img.get_rect()
-    
     kk_rct.center = WIDTH // 2 - 200, HEIGHT // 2 # 文字の配置
     screen.blit(kk_img, kk_rct)
     kk_rct.center = WIDTH // 2 + 200, HEIGHT // 2
@@ -91,7 +87,6 @@ def gameover(screen: pg.Surface) -> None:
     
     pg.display.update() # ゲームオーバー5秒
     time.sleep(5)
-
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -120,7 +115,6 @@ def main():
             return
 
         screen.blit(bg_img, [0, 0])
-
         key_lst = pg.key.get_pressed() # こうかとん移動
         sum_mv = [0, 0]
         for key, mv in DELTA.items():
@@ -132,12 +126,10 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
-
         vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy)) # 爆弾からこうかとんへのベクトルを計算
 
         idx = min(tmr // 500, 9) # 爆弾の拡大・加速
         bb_img = bb_imgs[idx]
-        
         avx = vx * bb_accs[idx]
         avy = vy * bb_accs[idx]
 
