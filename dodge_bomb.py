@@ -43,13 +43,18 @@ def main():
     bb_rct = bb_img.get_rect()
     bb_rct.centerx = random.randint(0,WIDTH)
     bb_rct.centery = random.randint(0,HEIGHT)
-    vx,vy = +5,+5
+    vx,vy = +5,+5 # 爆弾の横速度、縦速度
     clock = pg.time.Clock()
     tmr = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+            
+        if kk_rct.colliderect(bb_rct):
+            print("ゲームオーバー")
+            return
+           
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
