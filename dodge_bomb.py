@@ -23,11 +23,12 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     bb_img = pg.Surface((20,20))
-    pg.draw.circle(bg_img,(255,0,0),(10,10),10)
+    pg.draw.circle(bb_img,(255,0,0),(10,10),10)
     bb_img.set_colorkey((0,0,0))
     bb_rct = bb_img.get_rect()
     bb_rct.centerx = random.randint(0,WIDTH)
     bb_rct.centery = random.randint(0,HEIGHT)
+    vx,vy = +5,+5
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -54,7 +55,7 @@ def main():
 
         kk_rct.move_ip(sum_mv)
         screen.blit(kk_img, kk_rct)
-
+        bb_rct.move_ip(vx,vy)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
